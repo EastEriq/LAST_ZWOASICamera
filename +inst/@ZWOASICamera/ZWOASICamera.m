@@ -1,4 +1,4 @@
-classdef ZWO_ASICamera < handle
+classdef ZWOASICamera < handle
 
     properties
     end
@@ -6,7 +6,7 @@ classdef ZWO_ASICamera < handle
     methods
 
        % Constructor
-       function Z=ZWO_ASICamera()
+       function Z=ZWOASICamera()
            if libisloaded('libASICamera2')
                unloadlibrary('libASICamera2')
            end
