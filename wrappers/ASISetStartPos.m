@@ -1,5 +1,8 @@
-function [ret,]=ASISetStartPos()
-% automatically generated parsing ASICamera2.h
-% Only useful as a template, remove comment when fixed
-    [ret,]=calllib('libASICamera2','ASISetStartPos',);
+function [ret]=ASISetStartPos(cid,sx,sy)
+% set start position of ROI
+% Notes:the position is relative to the image after binning. 
+% Call this function to change ROI area to the
+% origin after ASISetROIFormat, because ASISetROIFormat will change ROI to the center.
+    [ret]=calllib('libASICamera2','ASISetStartPos',cid,sx,sy);
     ret=inst.ASI_ERROR_CODE(ret);
+    
