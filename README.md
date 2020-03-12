@@ -15,5 +15,5 @@ In principle they can be copied anywhere the command `loadlibrary` in the instan
 
 A symbolic link `libASICamera2.so` to the actual library file has also to be created in that directory. E.g.,
 ```
-ln -s  libASICamera2.so libASICamera2.so.1.14.1227
+ln -s libASICamera2.so.1.14.1227 libASICamera2.so 
 ```
