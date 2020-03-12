@@ -1,3 +1,4 @@
 *.so.*
 /+inst/@ZWOASICamera/lib/libASICamera2_thunk_glnxa64.so
 /+inst/@ZWOASICamera/lib/mxproto.m
+*.m~

@@ -1,4 +1,5 @@
-function []=ASIGetNumOfControls()
-% automatically generated parsing ASICamera2.h
-% Only useful as a template, remove comment when fixed
-    [ret,]=calllib('libASICamera2','ASIGetNumOfControls',)
+function [ret,noc]=ASIGetNumOfControls(cid)
+% get the number of control types for the specific camera ID
+    pnoc=libpointer('int32Ptr',-1);
+    [ret,noc]=calllib('libASICamera2','ASIGetNumOfControls',cid,pnoc);
+    ret=inst.ASI_ERROR_CODE(ret);

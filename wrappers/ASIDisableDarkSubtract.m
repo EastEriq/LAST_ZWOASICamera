@@ -1,4 +1,5 @@
-function []=ASIDisableDarkSubtract()
+function [ret,]=ASIDisableDarkSubtract()
 % automatically generated parsing ASICamera2.h
 % Only useful as a template, remove comment when fixed
-    [ret,]=calllib('libASICamera2','ASIDisableDarkSubtract',)
+    [ret,]=calllib('libASICamera2','ASIDisableDarkSubtract',);
+    ret=inst.ASI_ERROR_CODE(ret);

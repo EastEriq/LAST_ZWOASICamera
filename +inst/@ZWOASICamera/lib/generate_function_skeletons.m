@@ -10,10 +10,11 @@ for i=1:length(methodinfo.name)
     if ~isfile(filename)
     % don't overwrite existing files
         fid=fopen(filename,'w');
-        fprintf(fid,'function []=%s()\n',methodinfo.name{i});
+        fprintf(fid,'function [ret,]=%s()\n',methodinfo.name{i});
         fprintf(fid,'%% automatically generated parsing ASICamera2.h\n');
         fprintf(fid,'%% Only useful as a template, remove comment when fixed\n');
-        fprintf(fid,'    [ret,]=calllib(''libASICamera2'',''%s'',)\n',methodinfo.name{i});
+        fprintf(fid,'    [ret,]=calllib(''libASICamera2'',''%s'',);\n',methodinfo.name{i});
+        fprintf(fid,'    ret=inst.ASI_ERROR_CODE(ret);\n');
         fclose(fid);
     end
 end

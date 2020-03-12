@@ -1,4 +1,5 @@
-function []=ASICloseCamera()
-% automatically generated parsing ASICamera2.h
-% Only useful as a template, remove comment when fixed
-    [ret,]=calllib('libASICamera2','ASICloseCamera',)
+function [ret]=ASICloseCamera(cid)
+% close a specific camera ID so that its resources will be released. 
+% This should be the last call to shut down a camera
+    [ret]=calllib('libASICamera2','ASICloseCamera',cid);
+    ret=inst.ASI_ERROR_CODE(ret);
