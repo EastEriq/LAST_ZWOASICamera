@@ -710,7 +710,8 @@ ASI_ERROR_INVALID_ID  :no camera of this ID is connected or ID value is out of b
 
 ***************************************************************************/
 
-ASICAMERA_API ASI_ERROR_CODE  ASIGetExpStatus(int iCameraID, ASI_EXPOSURE_STATUS *pExpStatus);
+//ASICAMERA_API ASI_ERROR_CODE  ASIGetExpStatus(int iCameraID, ASI_EXPOSURE_STATUS *pExpStatus);
+ASICAMERA_API ASI_ERROR_CODE  ASIGetExpStatus(int iCameraID, int *pExpStatus);
 
 /***************************************************************************
 Descriptions:
