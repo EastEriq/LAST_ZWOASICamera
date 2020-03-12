@@ -1,4 +1,4 @@
-classdef ASI_BAYER_PATTERN < uint8
+classdef ASI_BAYER_PATTERN < int16
 % automatically generated parsing ASICamera2.h
     enumeration
         ASI_BAYER_RG (0)

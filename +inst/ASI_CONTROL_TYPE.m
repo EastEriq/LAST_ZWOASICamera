@@ -1,4 +1,4 @@
-classdef ASI_CONTROL_TYPE < uint8
+classdef ASI_CONTROL_TYPE < int16
 % automatically generated parsing ASICamera2.h
     enumeration
         ASI_GAIN (0)

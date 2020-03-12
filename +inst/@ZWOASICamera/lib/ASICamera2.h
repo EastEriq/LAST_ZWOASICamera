@@ -131,7 +131,7 @@ typedef struct _ASI_CAMERA_INFO
 
 	int SupportedBins[16]; //1 means bin1 which is supported by every camera, 2 means bin 2 etc.. 0 is the end of supported binning method
 	// ASI_IMG_TYPE SupportedVideoFormat[8]; //this array will content with the support output format type.IMG_END is the end of supported video format
-	int SupportedVideoFormat[8]; //this array will content with the support output format type.IMG_END is the end of supported video format
+	int SupportedVideoFormat[8]; // casted to int for Matlab parser
 
 	double PixelSize; //the pixel size of the camera, unit is um. such like 5.6um
 	ASI_BOOL MechanicalShutter;
@@ -203,7 +203,8 @@ typedef struct _ASI_ID{
 typedef ASI_ID ASI_SN;
 
 typedef struct _ASI_SUPPORTED_MODE{
-	ASI_CAMERA_MODE SupportedCameraMode[16];// this array will content with the support camera mode type.ASI_MODE_END is the end of supported camera mode
+//	ASI_CAMERA_MODE SupportedCameraMode[16];// this array will content with the support camera mode type.ASI_MODE_END is the end of supported camera mode
+	int SupportedCameraMode[16];// casted to int for Matlab
 }ASI_SUPPORTED_MODE;
 
 #ifndef __cplusplus

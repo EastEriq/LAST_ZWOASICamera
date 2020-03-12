@@ -1,4 +1,4 @@
-classdef ASI_CAMERA_MODE < uint8
+classdef ASI_CAMERA_MODE < int16
 % automatically generated parsing ASICamera2.h
     enumeration
         ASI_MODE_NORMAL (0)

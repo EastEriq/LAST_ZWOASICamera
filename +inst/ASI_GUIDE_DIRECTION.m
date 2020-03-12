@@ -1,4 +1,4 @@
-classdef ASI_GUIDE_DIRECTION < uint8
+classdef ASI_GUIDE_DIRECTION < int16
 % automatically generated parsing ASICamera2.h
     enumeration
         ASI_GUIDE_NORTH (0)

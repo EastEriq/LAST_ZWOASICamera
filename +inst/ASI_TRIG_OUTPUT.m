@@ -1,4 +1,4 @@
-classdef ASI_TRIG_OUTPUT < uint8
+classdef ASI_TRIG_OUTPUT < int16
 % automatically generated parsing ASICamera2.h
     enumeration
         ASI_TRIG_OUTPUT_PINA (0)

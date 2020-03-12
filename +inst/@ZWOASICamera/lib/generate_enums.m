@@ -12,7 +12,7 @@ for i=1:length(enumclass)
     filename=fullfile('..','..',[enumclass{i} '.m']);
     
     fid=fopen(filename,'w');
-    fprintf(fid,'classdef %s < uint8\n',enumclass{i});
+    fprintf(fid,'classdef %s < int16\n',enumclass{i});
     fprintf(fid,'%% automatically generated parsing ASICamera2.h\n');
     fprintf(fid,'    enumeration\n');
     for k=1:length(values)

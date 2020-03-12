@@ -1,4 +1,4 @@
-classdef ASI_BOOL < uint8
+classdef ASI_BOOL < int16
 % automatically generated parsing ASICamera2.h
     enumeration
         ASI_FALSE (0)

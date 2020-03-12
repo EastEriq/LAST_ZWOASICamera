@@ -1,4 +1,4 @@
-classdef ASI_FLIP_STATUS < uint8
+classdef ASI_FLIP_STATUS < int16
 % automatically generated parsing ASICamera2.h
     enumeration
         ASI_FLIP_NONE (0)

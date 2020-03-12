@@ -1,4 +1,4 @@
-classdef ASI_ERROR_CODE < uint8
+classdef ASI_ERROR_CODE < int16
 % automatically generated parsing ASICamera2.h
     enumeration
         ASI_SUCCESS (0)

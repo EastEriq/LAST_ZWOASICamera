@@ -1,4 +1,4 @@
-classdef ASI_IMG_TYPE < uint8
+classdef ASI_IMG_TYPE < int16
 % automatically generated parsing ASICamera2.h
     enumeration
         ASI_IMG_RAW8 (0)

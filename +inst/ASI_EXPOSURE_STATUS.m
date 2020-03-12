@@ -1,4 +1,4 @@
-classdef ASI_EXPOSURE_STATUS < uint8
+classdef ASI_EXPOSURE_STATUS < int16
 % automatically generated parsing ASICamera2.h
     enumeration
         ASI_EXP_IDLE (0)
