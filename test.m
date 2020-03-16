@@ -17,5 +17,7 @@ ASIStopExposure(Cinfo.CameraID)
 
 [ret,dropped]=ASIGetDroppedFrames(Cinfo.CameraID)
 
+[ret,id]=ASIGetID(Cinfo.CameraID)
+
 [ret]=ASICloseCamera(Cinfo.CameraID)
 
