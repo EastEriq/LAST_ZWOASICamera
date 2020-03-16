@@ -15,9 +15,20 @@ ret=ASIStartExposure(Cinfo.CameraID)
 [ret,expstatus]=ASIGetExpStatus(Cinfo.CameraID)
 ASIStopExposure(Cinfo.CameraID)
 
+[ret,data]=ASIGetDataAfterExp(Cinfo.CameraID,9576*6388);
+
+ASIStartVideoCapture(Cinfo.CameraID)
+pause(1)
+[ret,data]=ASIGetVideoData(Cinfo.CameraID,9576*6388); ret
+ASIStopVideoCapture(Cinfo.CameraID)
+
 [ret,dropped]=ASIGetDroppedFrames(Cinfo.CameraID)
 
+imagesc(reshape(data,9576,6388))
+
 [ret,id]=ASIGetID(Cinfo.CameraID)
+
+
 
 [ret]=ASICloseCamera(Cinfo.CameraID)
 

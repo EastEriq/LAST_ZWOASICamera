@@ -1,7 +1,9 @@
 # LAST_ZWOASICamera
 
-LAST hardware driver for ZWO cameras. Tested with ASI_linux_mac_SDK_V1.14.1227, downloaded from
-[ZWO site](https://astronomy-imaging-camera.com/software-drivers) , on Ubuntu 19.
+LAST hardware driver for ZWO cameras.
+
+Tested with ASI_linux_mac_SDK_V1.14.1227, downloaded from
+[ZWO site](https://astronomy-imaging-camera.com/software-drivers), on Ubuntu 18 and 19.
 
 # Installation and troubleshooting
 
