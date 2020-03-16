@@ -1,5 +1,5 @@
-function [ret,]=ASIGetDroppedFrames()
-% automatically generated parsing ASICamera2.h
-% Only useful as a template, remove comment when fixed
-    [ret,]=calllib('libASICamera2','ASIGetDroppedFrames',);
+function [ret,dropped]=ASIGetDroppedFrames(cid)
+% get dropped frames' count during video capture
+    pdropped=libpointer('int32Ptr',0);
+    [ret,dropped]=calllib('libASICamera2','ASIGetDroppedFrames',cid,pdropped);
     ret=inst.ASI_ERROR_CODE(ret);
