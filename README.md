@@ -7,8 +7,8 @@ Tested with ASI_linux_mac_SDK_V1.14.1227, downloaded from
 
 # Installation and troubleshooting
 
-Upon simple connection of the camera, even without installing software, `dmesg` should show something like
-
+Upon simple connection of the camera, even without installing software, `dmesg -wH` should show
+something like
 ```
 [  +9.144051] usb 1-2: new high-speed USB device number 15 using xhci_hcd
 [  +0.149413] usb 1-2: New USB device found, idVendor=04b4, idProduct=6572
@@ -44,16 +44,16 @@ ln -s libASICamera2.so.1.14.1227 libASICamera2.so
 ### however,
 
 that alone may be not enough for the camera to work. Rule files in `/etc/udev/rules.d` are probably necessary for the camera to be connected. Installing
-(ASIStudio)[https://astronomy-imaging-camera.com/software/ASIStudio_V1.0.1.run] does it.
+[ASIStudio](https://astronomy-imaging-camera.com/software/ASIStudio_V1.0.1.run) does it.
 ASIStudio is convenient also as independent camera-control interface, just big (134MB, bundles several libraries for good).
 
-The rule files which result are `asi.rules`, `eaf.rules`, `efw.rules`. I guess that only
+The rule files which result are `asi.rules`, `eaf.rules`, `efw.rules`. Only
 the first is the one relevant to the camera, the others are for other ZWO hardware. `asi.rules` spells:
 ```
 ACTION=="add", ATTR{idVendor}=="03c3", RUN+="/bin/sh -c '/bin/echo 200 >/sys/mod
 ule/usbcore/parameters/usbfs_memory_mb'"
 # All ASI Cameras and filter wheels
-SUBSYSTEMS=="usb", ATTR{idVendor}=="03c3", MODE="0666" 
+SUBSYSTEMS=="usb", ATTR{idVendor}=="03c3", MODE="0666"
 ```
 
 Note that if the rule is not in place, the matlab binding finds the camera, but is not able

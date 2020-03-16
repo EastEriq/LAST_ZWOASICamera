@@ -18,6 +18,15 @@ classdef ZWOASICamera < handle
 
        % destructor
        function delete(Z)
+           try
+               % unloading prevents crashes on exiting matlab
+               unloadlibrary('libASICamera2')
+           catch
+               % unloading ought to fail silently if there are extant objects
+               %  depending on the library, which should happen only if
+               %  other ZWOCamera objects still exist.
+               % Modulo that unload fails for some other weird reason...
+           end
        end
 
     end

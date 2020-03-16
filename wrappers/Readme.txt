@@ -1,1 +1,1 @@
-will move these functions to @ZWOASICam-private when sufficiently worked out
+I will move these functions to @ZWOASICam/private, when sufficiently worked out
