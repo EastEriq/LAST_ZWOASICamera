@@ -215,6 +215,7 @@ typedef struct _ASI_SUPPORTED_MODE{
 #define ASI_IMG_TYPE int
 #define ASI_GUIDE_DIRECTION int
 #define ASI_BAYER_PATTERN int
+#define ASI_CAMERA_MODE int //added for Matlab
 #endif
 
 #ifdef __cplusplus
