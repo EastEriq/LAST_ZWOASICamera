@@ -128,11 +128,11 @@ classdef ZWOASICamera < handle
             Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,'could not read status')
         end
         
-        function set.Temperature(QC,Temp)
+        function set.Temperature(Z,Temp)
             % set the target sensor temperature in Celsius
-            ret=ASISetControlValue(Cinfo.CameraID,...
+            ret=ASISetControlValue(Z.camhandle,...
                   inst.ASI_CONTROL_TYPE.ASI_TARGET_TEMP,Temp);
-            QC.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
+            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
                 'could not set temperature')
         end
         
@@ -140,10 +140,40 @@ classdef ZWOASICamera < handle
             % get the actual temperature
             [ret,Temp]=ASIGetControlValue(Z.camhandle,...
                        inst.ASI_CONTROL_TYPE.ASI_TEMPERATURE);
+            Temp=Temp/10; % apparently; confirm it.
             Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
                 'could not read temperature')
         end
 
+        function status=get.CoolingStatus(Z)
+            % Get the current cooling status, by checking the current PWM
+            %  applied to the cooler.
+            % Could also read the control ASI_COOLER_ON. The two have
+            %  different meaning. Cooling may be turned on, but the current
+            %  pwm may be zero because the target temperature has been reached
+            [ret,pwm]=ASIGetControlValue(Z.camhandle,...
+                       inst.ASI_CONTROL_TYPE.ASI_COOLER_POWER_PERC);
+            if pwm==0
+                status='off';
+            elseif pwm<=100
+                status='on';
+            elseif ret~=inst.ASI_ERROR_CODE.ASI_SUCCESS
+                status='unknown';
+            end
+        end
+
+    end
+    
+    methods
+        
+        function listcontrols(Z)
+            % list al the supported control capabilities; debug; may be removed later on
+            [~,noc]=ASIGetNumOfControls(Z.camhandle);
+            for i=0:noc-1
+                [~,cap]=ASIGetControlCaps(Z.camhandle,i)
+            end
+        end
+        
     end
 
 end
