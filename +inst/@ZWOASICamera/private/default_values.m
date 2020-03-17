@@ -6,5 +6,6 @@ function default_values(Z)
     Z.Gain=0;
     Z.offset=1;
     Z.binning=[1,1];
-    Z.Temperature=-20; % check if reachable...    
+    Z.Temperature=-20; % check if reachable...
+    Z.coolingOn
 end

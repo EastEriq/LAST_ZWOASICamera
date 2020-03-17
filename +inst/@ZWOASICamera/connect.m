@@ -105,12 +105,9 @@ function success=connect(Z,cameranum)
     % put here also some plausible parameter settings which are
     %  not likely to be changed
 
-    colormode=false; % (local variable because no getter)
-    Z.color=colormode;
+    Z.color=false;
     
     % set default values, perhaps differentiating camera models
-    %Z.default_values
-
-    Z.CamStatus='idle'; % whishful, if we got till here.
+    Z.default_values
     
 end

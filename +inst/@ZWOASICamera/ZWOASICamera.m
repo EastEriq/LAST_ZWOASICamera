@@ -9,7 +9,6 @@ classdef ZWOASICamera < handle
         %   of the camera require that camhandle is obtained first.
         %  Values set here as default won't likely be passed to the camera
         %   when the object is created
-        binning=[1,1]; % beware - SDK sets both equal
     end
 
     properties(Transient)
@@ -19,10 +18,11 @@ classdef ZWOASICamera < handle
     properties(Dependent = true)
         ExpTime=10;
         Gain=0;
+        offset
         Temperature
         ROI
+        binning=[1,1]; % beware - SDK sets both equal
         ReadMode
-        offset
     end
     
     properties(GetAccess = public, SetAccess = private)
@@ -194,6 +194,8 @@ classdef ZWOASICamera < handle
         end
 
         function set.ROI(Z,roi)
+            % ROI width has to be multiple of 8 and height multiple of 2.
+            % Notes:the position is relative to the image after binning
             x1=roi(1);
             y1=roi(2);
             sx=roi(3)-roi(1)+1;
@@ -205,9 +207,11 @@ classdef ZWOASICamera < handle
             sx=max(min(sx,Z.physical_size.nx-x1),1);
             sy=max(min(sy,Z.physical_size.ny-y1),1);
             
-            ret1=ASISetStartPos(Z.camhandle,x1,y1);
-            type=inst.ASI_IMG_TYPE.inst.ASI_IMG_TYPE; % the only one we work in
-            ret2=ASISetROIFormat(Z.camhandle,sx,sy,max(Z.binning),type);
+            type=inst.ASI_IMG_TYPE.ASI_IMG_RAW16; % the only one we work in
+            ret1=ASISetROIFormat(Z.camhandle,sx,sy,max(Z.binning),type);
+             % StartPos is called second
+             %  "because ASISetROIFormat will change ROI to the center")
+            ret2=ASISetStartPos(Z.camhandle,x1,y1);
             
             success= (ret1==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
                       ret2==inst.ASI_ERROR_CODE.ASI_SUCCESS);
@@ -222,6 +226,7 @@ classdef ZWOASICamera < handle
         end
 
         function roi=get.ROI(Z)
+            % Notes:the position is relative to the image after binning
             [ret1,w,h,~,~]=ASIGetROIFormat(Z.camhandle);
             [ret2,x1,y1]=ASIGetStartPos(Z.camhandle);
             roi=[x1,y1,x1+w-1,y1+h-1];
@@ -243,7 +248,34 @@ classdef ZWOASICamera < handle
             Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
                 'could not get offset')
         end
-
+        
+        function set.ReadMode(Z,readMode)
+            % this SDK doesn't seem to implement  read modes, ignore
+        end
+        
+        function currentReadMode=get.ReadMode(Z)
+            % this SDK doesn't seem to implement  read modes, just return 0
+            currentReadMode=0;
+        end
+        
+        function set.binning(Z,binning)
+            % may be tricky: ROI has to take binning into account
+            % also, ASI_CONTROL_TYPE.ASI_HARDWARE_BIN and
+            % ASI_CONTROL_TYPE.ASI_MONO_BIN (software) could be in the way.
+            sx=Z.ROI(3)-Z.ROI(1)+1;
+            sy=Z.ROI(4)-Z.ROI(2)+1;
+            type=inst.ASI_IMG_TYPE.ASI_IMG_RAW16; % the only one we work in
+            ret=ASISetROIFormat(Z.camhandle,sx,sy,max(binning),type);
+            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
+                'could not set binning')
+        end
+        
+        function binning=get.binning(Z)
+                 [ret,~,~,bin]=ASIGetROIFormat(Z.camhandle);
+                 binning=[bin,bin];
+                 Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
+                     'could not get offset')
+        end
        
     end
     
@@ -253,7 +285,26 @@ classdef ZWOASICamera < handle
             % list al the supported control capabilities; debug; may be removed later on
             [~,noc]=ASIGetNumOfControls(Z.camhandle);
             for i=0:noc-1
-                [~,cap]=ASIGetControlCaps(Z.camhandle,i)
+                [~,cap]=ASIGetControlCaps(Z.camhandle,i);
+                [~,value,auto]=ASIGetControlValue(Z.camhandle,cap.ControlType);
+                if cap.IsAutoSupported==inst.ASI_BOOL.ASI_FALSE
+                    autosup='NoAuto';
+                else
+                    autosup='<Auto>';
+                end
+                if cap.IsWritable==inst.ASI_BOOL.ASI_FALSE
+                    rw='RO';
+                else
+                    rw='RW';
+                end
+                if auto==inst.ASI_BOOL.ASI_FALSE
+                    au='set ';
+                else
+                    au='auto';
+                end
+                fprintf('\n%#2d. %-25s %-26s %s, %s\n    "%s"\n    %d, %s ([%d:%d], default %d)\n',...
+                    i, cap.Name, cap.ControlType, autosup, rw, cap.Description,...
+                    value, au, cap.MinValue, cap.MaxValue, cap.DefaultValue);
             end
         end
         
