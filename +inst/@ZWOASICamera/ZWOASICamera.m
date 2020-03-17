@@ -10,8 +10,6 @@ classdef ZWOASICamera < handle
         %  Values set here as default won't likely be passed to the camera
         %   when the object is created
         binning=[1,1]; % beware - SDK sets both equal
-        ExpTime=10;
-        Gain=0;
     end
 
     properties(Transient)
@@ -19,6 +17,8 @@ classdef ZWOASICamera < handle
     end
         
     properties(Dependent = true)
+        ExpTime=10;
+        Gain=0;
         Temperature
         ROI
         ReadMode
@@ -160,6 +160,37 @@ classdef ZWOASICamera < handle
             elseif ret~=inst.ASI_ERROR_CODE.ASI_SUCCESS
                 status='unknown';
             end
+        end
+        
+        function set.ExpTime(Z,ExpTime)
+            % ExpTime in seconds
+            ret=ASISetControlValue(Z.camhandle,...
+                  inst.ASI_CONTROL_TYPE.ASI_EXPOSURE,ExpTime*1e6,false);
+            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
+                'could not set exposure time')
+        end
+        
+        function ExpTime=get.ExpTime(Z)
+            % ExpTime in seconds
+            [ret,ExpTime]=ASIGetControlValue(Z.camhandle,...
+                       inst.ASI_CONTROL_TYPE.ASI_EXPOSURE);
+            ExpTime=double(ExpTime)/1e6; % us->s
+            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
+                'could not get exposure time')
+        end
+
+        function set.Gain(Z,Gain)
+            ret=ASISetControlValue(Z.camhandle,...
+                  inst.ASI_CONTROL_TYPE.ASI_GAIN,Gain,false);
+            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
+                'could not set gain')
+        end
+        
+        function Gain=get.Gain(Z)
+            [ret,Gain]=ASIGetControlValue(Z.camhandle,...
+                       inst.ASI_CONTROL_TYPE.ASI_GAIN);
+            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
+                'could not get gain')
         end
 
     end

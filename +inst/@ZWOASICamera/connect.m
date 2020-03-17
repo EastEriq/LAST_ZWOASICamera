@@ -34,7 +34,6 @@ function success=connect(Z,cameranum)
         return;
     end
     
-    Z.CameraName=Cinfo.Name;
     Z.camhandle=Cinfo.CameraID;
     
     ret2=ASIOpenCamera(Z.camhandle);
@@ -44,7 +43,10 @@ function success=connect(Z,cameranum)
     else
         Z.report(sprintf('Opened camera "%s"\n',Z.CameraName));
     end
-
+    
+    [~,SN]=ASIGetSerialNumber(Z.camhandle);
+    Z.CameraName=[Cinfo.Name ' ' SN];
+    
     ASIInitCamera(Z.camhandle);
 
     % query the camera and populate the Z structures with some
