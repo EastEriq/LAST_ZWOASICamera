@@ -193,6 +193,58 @@ classdef ZWOASICamera < handle
                 'could not get gain')
         end
 
+        function set.ROI(Z,roi)
+            x1=roi(1);
+            y1=roi(2);
+            sx=roi(3)-roi(1)+1;
+            sy=roi(4)-roi(2)+1;
+            
+            % try to clip unreasonable values
+            x1=max(min(x1,Z.physical_size.nx-1),0);
+            y1=max(min(y1,Z.physical_size.ny-1),0);
+            sx=max(min(sx,Z.physical_size.nx-x1),1);
+            sy=max(min(sy,Z.physical_size.ny-y1),1);
+            
+            ret1=ASISetStartPos(Z.camhandle,x1,y1);
+            type=inst.ASI_IMG_TYPE.inst.ASI_IMG_TYPE; % the only one we work in
+            ret2=ASISetROIFormat(Z.camhandle,sx,sy,max(Z.binning),type);
+            
+            success= (ret1==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
+                      ret2==inst.ASI_ERROR_CODE.ASI_SUCCESS);
+            Z.setLastError(success,'could not set ROI')
+            if success
+                Z.report(sprintf('ROI successfully set to (%d,%d)+(%dx%d)\n',...
+                          x1,y1,sx,sy));
+            else
+                Z.report(sprintf('set ROI to (%d,%d)+(%dx%d) FAILED\n',x1,y1,sx,sy));
+            end
+            
+        end
+
+        function roi=get.ROI(Z)
+            [ret1,w,h,~,~]=ASIGetROIFormat(Z.camhandle);
+            [ret2,x1,y1]=ASIGetStartPos(Z.camhandle);
+            roi=[x1,y1,x1+w-1,y1+h-1];
+            success= (ret1==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
+                      ret2==inst.ASI_ERROR_CODE.ASI_SUCCESS);
+            Z.setLastError(success,'could not set ROI')
+        end
+        
+        function set.offset(Z,offset)
+            ret=ASISetControlValue(Z.camhandle,...
+                inst.ASI_CONTROL_TYPE.ASI_OFFSET,offset,false);
+            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
+                'could not set offset')
+        end
+        
+        function offset=get.offset(Z)
+            [ret,offset]=ASIGetControlValue(Z.camhandle,...
+                inst.ASI_CONTROL_TYPE.ASI_OFFSET);
+            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
+                'could not get offset')
+        end
+
+       
     end
     
     methods

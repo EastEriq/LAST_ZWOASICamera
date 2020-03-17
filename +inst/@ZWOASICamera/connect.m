@@ -5,7 +5,7 @@ function success=connect(Z,cameranum)
     %  cameranum: int, number of the camera to open (as enumerated by the SDK)
     %     May be omitted. In that case the last camera is referred to
     
-    % TODO, matlab crashes if the connect is called on an already connected
+    % TODO, matlab crashes if connect() is called on an already connected
     %  camera
 
     Z.lastError='';
@@ -25,9 +25,9 @@ function success=connect(Z,cameranum)
                          % (TODO, if possible, the first not
                          %  already open)
     else
-        Z.cameranum=cameranum;
+        Z.cameranum=max(min(cameranum,num),1);
     end
-    [ret1,Cinfo]=ASIGetCameraProperty(max(min(Z.cameranum,num)-1,0));
+    [ret1,Cinfo]=ASIGetCameraProperty(Z.cameranum-1);
 
     if ret1
         Z.lastError='could not even get one camera id';
@@ -37,6 +37,8 @@ function success=connect(Z,cameranum)
     Z.camhandle=Cinfo.CameraID;
     
     ret2=ASIOpenCamera(Z.camhandle);
+    [~,SN]=ASIGetSerialNumber(Z.camhandle);
+    Z.CameraName=[Cinfo.Name ' ' SN];
     if ret2
         Z.lastError='could not even get one camera id';
         return;
@@ -44,8 +46,6 @@ function success=connect(Z,cameranum)
         Z.report(sprintf('Opened camera "%s"\n',Z.CameraName));
     end
     
-    [~,SN]=ASIGetSerialNumber(Z.camhandle);
-    Z.CameraName=[Cinfo.Name ' ' SN];
     
     ASIInitCamera(Z.camhandle);
 
