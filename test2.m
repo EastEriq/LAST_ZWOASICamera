@@ -1,0 +1,1 @@
+Z=inst.ZWOASICamera

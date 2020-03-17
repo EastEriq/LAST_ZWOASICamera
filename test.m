@@ -1,4 +1,4 @@
-addpath wrappers
+addpath wrappers %% worked only till it was moved to +inst/@ZWOASICamera/private
 Z=inst.ZWOASICamera
 num=ASIGetNumOfConnectedCameras
 [ret,Cinfo]=ASIGetCameraProperty(num-1)
