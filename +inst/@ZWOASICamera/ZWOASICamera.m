@@ -109,5 +109,41 @@ classdef ZWOASICamera < handle
        end
 
     end
+    
+    methods %getters and setters
+        
+        function status=get.CamStatus(Z)
+            % rely on GetExpStatus to start with
+            [ret,ASIstatus]=ASIGetExpStatus(Z.camhandle);
+            switch ASIstatus
+                case inst.ASI_EXPOSURE_STATUS.ASI_EXP_IDLE
+                    status='idle';
+                case inst.ASI_EXPOSURE_STATUS.ASI_EXP_WORKING
+                    status='exposing';
+                case inst.ASI_EXPOSURE_STATUS.ASI_EXP_SUCCESS
+                    status='reading';
+                case inst.ASI_EXPOSURE_STATUS.ASI_EXP_FAILED
+                    status='unknown';
+            end
+            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,'could not read status')
+        end
+        
+        function set.Temperature(QC,Temp)
+            % set the target sensor temperature in Celsius
+            ret=ASISetControlValue(Cinfo.CameraID,...
+                  inst.ASI_CONTROL_TYPE.ASI_TARGET_TEMP,Temp);
+            QC.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
+                'could not set temperature')
+        end
+        
+        function Temp=get.Temperature(Z)
+            % get the actual temperature
+            [ret,Temp]=ASIGetControlValue(Z.camhandle,...
+                       inst.ASI_CONTROL_TYPE.ASI_TEMPERATURE);
+            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
+                'could not read temperature')
+        end
+
+    end
 
 end
