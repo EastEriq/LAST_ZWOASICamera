@@ -8,11 +8,16 @@ function imgs=takeExposureSeq(Z,num,expTime)
 
     Z.lastError='';
     
+    t0=now;
     ret=ASIStartVideoCapture(Z.camhandle);
+    t1=now;
+    Z.time_start_delta=t1-t0;
     if ret~=inst.ASI_ERROR_CODE.ASI_SUCCESS
         Z.lastError='could not start live video mode';
         Z.deallocate_image_buffer
         return
+    else
+        Z.time_start=t0;
     end
             
     Z.allocate_image_buffer
@@ -24,12 +29,14 @@ function imgs=takeExposureSeq(Z,num,expTime)
                 
         ret=ASIGetVideoData(Z.camhandle, Z.pImg,...
                             w*h*Z.bitDepth/8, (2*Z.ExpTime+0.5)*1e6);
-        imgs{i}=unpackImgBuffer(Z.pImg,w,h,1,Z.bitDepth);
         
         if ret~=inst.ASI_ERROR_CODE.ASI_SUCCESS
             Z.lastError='error in retrieving live image';
             Z.deallocate_image_buffer
             return
+        else
+            Z.time_end=now;
+            imgs{i}=unpackImgBuffer(Z.pImg,w,h,1,Z.bitDepth);
         end
     end
     
@@ -37,4 +44,7 @@ function imgs=takeExposureSeq(Z,num,expTime)
     Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
                            'could not stop live video mode');
     Z.deallocate_image_buffer
+    
+    [ret,dropped]=ASIGetDroppedFrames(Z.camhandle);
+    Z.report(sprintf('%d video frames dropped\n',dropped))
 end
