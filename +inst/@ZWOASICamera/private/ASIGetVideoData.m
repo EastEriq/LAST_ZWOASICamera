@@ -1,4 +1,4 @@
-function [ret,data]=ASIGetVideoData(cid,bufsize,waitms)
+function [ret,data]=ASIGetVideoData(cid,pdata,bufsize,waitms)
 % after ASIStartVideoCapture (), call this function repeatedly to get images on a continuous basis.
 % The function resets the capture to the next frame so you cannot get the same frame
 % twice if the function is called two times in very short succession.
@@ -14,8 +14,15 @@ function [ret,data]=ASIGetVideoData(cid,bufsize,waitms)
     if ~exist('waitms','var')
         waitms=500;
     end
-    % consider allocating externally the pointer to reduce the overhead for
+    % the pointer pdata is allocated externally in order to reduce the overhead for
     %  repeated calls
-    pdata=libpointer('uint8Ptr',zeros(1,bufsize,'uint8'));
-    [ret,data]=calllib('libASICamera2','ASIGetVideoData',cid,pdata,bufsize,waitms);
+    % pdata=libpointer('uint8Ptr',zeros(1,bufsize,'uint8'));
+    
+    % maybe we can omit the copy of the output data, just rely on the
+    %  buffer to be filled, and keep track only of its pointer
+    if nargout<2
+        ret=calllib('libASICamera2','ASIGetVideoData',cid,pdata,bufsize,waitms);
+    else
+        [ret,data]=calllib('libASICamera2','ASIGetVideoData',cid,pdata,bufsize,waitms);
+    end
     ret=inst.ASI_ERROR_CODE(ret);
