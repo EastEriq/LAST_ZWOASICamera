@@ -140,7 +140,7 @@ classdef ZWOASICamera < handle
             % get the actual temperature
             [ret,Temp]=ASIGetControlValue(Z.camhandle,...
                        inst.ASI_CONTROL_TYPE.ASI_TEMPERATURE);
-            Temp=Temp/10; % apparently; confirm it.
+            Temp=double(Temp)/10; % apparently; confirm it.
             Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
                 'could not read temperature')
         end
@@ -207,8 +207,12 @@ classdef ZWOASICamera < handle
             sx=max(min(sx,Z.physical_size.nx-x1),1);
             sy=max(min(sy,Z.physical_size.ny-y1),1);
             
-            type=inst.ASI_IMG_TYPE.ASI_IMG_RAW16; % the only one we work in
-            ret1=ASISetROIFormat(Z.camhandle,sx,sy,max(Z.binning),type);
+            if Z.bitDepth==16
+                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW16; % the only ones we work in
+            else
+                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW8; % the only ones we work in
+            end
+            ret1=ASISetROIFormat(Z.camhandle,sx,sy,max(Z.binning),imgtype);
              % StartPos is called second
              %  "because ASISetROIFormat will change ROI to the center")
             ret2=ASISetStartPos(Z.camhandle,x1,y1);
@@ -221,6 +225,12 @@ classdef ZWOASICamera < handle
                           x1,y1,sx,sy));
             else
                 Z.report(sprintf('set ROI to (%d,%d)+(%dx%d) FAILED\n',x1,y1,sx,sy));
+                if mod(sx,8)
+                    Z.report('ROI width must me a multiple of 8\n')
+                end
+                if mod(sy,2)
+                    Z.report('ROI height must me a multiple of 2\n')
+                end
             end
             
         end
@@ -262,12 +272,19 @@ classdef ZWOASICamera < handle
             % may be tricky: ROI has to take binning into account
             % also, ASI_CONTROL_TYPE.ASI_HARDWARE_BIN and
             % ASI_CONTROL_TYPE.ASI_MONO_BIN (software) could be in the way.
-            sx=Z.ROI(3)-Z.ROI(1)+1;
-            sy=Z.ROI(4)-Z.ROI(2)+1;
-            type=inst.ASI_IMG_TYPE.ASI_IMG_RAW16; % the only one we work in
-            ret=ASISetROIFormat(Z.camhandle,sx,sy,max(binning),type);
-            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
-                'could not set binning')
+            roi=Z.ROI;
+            sx=roi(3)-roi(1)+1;
+            sy=roi(4)-roi(2)+1;
+            if Z.bitDepth==16
+                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW16; % the only ones we work in
+            else
+                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW8; % the only ones we work in
+            end
+            ret1=ASISetROIFormat(Z.camhandle,sx,sy,max(binning),imgtype);
+            ret2=ASISetStartPos(Z.camhandle,roi(1),roi(2));           
+            success= (ret1==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
+                      ret2==inst.ASI_ERROR_CODE.ASI_SUCCESS);
+            Z.setLastError(success,'could not set ROI to set binning')
         end
         
         function binning=get.binning(Z)
@@ -276,36 +293,55 @@ classdef ZWOASICamera < handle
                  Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
                      'could not get offset')
         end
-       
-    end
-    
-    methods
         
-        function listcontrols(Z)
-            % list al the supported control capabilities; debug; may be removed later on
-            [~,noc]=ASIGetNumOfControls(Z.camhandle);
-            for i=0:noc-1
-                [~,cap]=ASIGetControlCaps(Z.camhandle,i);
-                [~,value,auto]=ASIGetControlValue(Z.camhandle,cap.ControlType);
-                if cap.IsAutoSupported==inst.ASI_BOOL.ASI_FALSE
-                    autosup='NoAuto';
-                else
-                    autosup='<Auto>';
-                end
-                if cap.IsWritable==inst.ASI_BOOL.ASI_FALSE
-                    rw='RO';
-                else
-                    rw='RW';
-                end
-                if auto==inst.ASI_BOOL.ASI_FALSE
-                    au='set ';
-                else
-                    au='auto';
-                end
-                fprintf('\n%#2d. %-25s %-26s %s, %s\n    "%s"\n    %d, %s ([%d:%d], default %d)\n',...
-                    i, cap.Name, cap.ControlType, autosup, rw, cap.Description,...
-                    value, au, cap.MinValue, cap.MaxValue, cap.DefaultValue);
+        function set.bitDepth(Z,BitDepth)
+            % BitDepth: 8 or 16 (bit).
+            % Constrain BitDepth to 8|16
+            % The function which changes the bit depth in the camera is the one
+            %  which sets the ROI
+            BitDepth=max(min(round(BitDepth/8)*8,16),8);
+            if BitDepth==16
+                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW16; % the only ones we work in
+            else
+                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW8; % the only ones we work in
             end
+            Z.report('setting ROI to set the new bit depth\n')
+            % duplicating some set.ROI code here
+            roi=Z.ROI;
+            sx=roi(3)-roi(1)+1;
+            sy=roi(4)-roi(2)+1;
+            ret1=ASISetROIFormat(Z.camhandle,sx,sy,max(Z.binning),imgtype);
+            ret2=ASISetStartPos(Z.camhandle,roi(1),roi(2));           
+            success= (ret1==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
+                      ret2==inst.ASI_ERROR_CODE.ASI_SUCCESS);
+            Z.setLastError(success,'could set ROI to set bit depth')
+        end
+
+        function bitDepth=get.bitDepth(Z)
+            [ret,~,~,~,imgtype]=ASIGetROIFormat(Z.camhandle);
+            switch imgtype
+                case inst.ASI_IMG_TYPE.ASI_IMG_RAW16
+                    bitDepth=16;
+                otherwise
+                    bitDepth=8;                    
+            end
+            success= (ret==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
+                      bitDepth==8 | bitDepth==16);
+            Z.setLastError(success,'could not get bit depth')
+        end
+
+        function set.color(Z,ColorMode)
+            % placeholder, let's allow only false, otherwise setting
+            %  it would need a cascade of calls setting ROI etc.
+            if ColorMode
+                msg='only RAW8 and RAW16 monochrome are implemented for now';
+                Z.report([msg '\n'])
+                Z.setLastError(~ColorMode,msg)
+            end
+        end
+        
+        function ColorMode=get.color(Z)
+            ColorMode=false;
         end
         
     end
