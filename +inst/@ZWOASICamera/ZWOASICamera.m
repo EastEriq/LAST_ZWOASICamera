@@ -16,8 +16,8 @@ classdef ZWOASICamera < handle
     end
         
     properties(Dependent = true)
-        ExpTime=10;
-        Gain=0;
+        ExpTime
+        Gain
         offset
         Temperature
         ROI
@@ -47,7 +47,7 @@ classdef ZWOASICamera < handle
     
     % settings which have not been prescribed by the API,
     % but for which I have already made the code
-    properties(Hidden)
+    properties(Hidden,Dependent)
         color
         bitDepth
     end
