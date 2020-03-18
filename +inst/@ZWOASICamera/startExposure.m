@@ -2,7 +2,9 @@ function startExposure(Z,expTime)
 % set up the scenes for taking a single exposure
 
     switch Z.CamStatus
-        case {'idle','unknown'} % shall we try exposing for 'unknown' too?
+        % Do we start a new exposure even if an old image is available
+        %  but hasn't been read? Shall we try exposing for 'unknown' too?
+        case {'idle','reading','unknown'} 
             if exist('expTime','var')
                 Z.ExpTime=expTime;
             end
@@ -33,7 +35,7 @@ function startExposure(Z,expTime)
             end
         otherwise
             Z.deallocate_image_buffer
-            Z.lastError='camera not ready to start exposure';
+            Z.lastError='camera not ready to start a new exposure';
     end
 
 end

@@ -3,7 +3,12 @@ function img=collectExposure(Z)
 
     switch Z.CamStatus
         case {'exposing','reading'}
-            % collect the image even if exposure not terminated?
+            % make this function blocking: if 'exposing', white
+            % indefinitely till status changes to 'reading'. This
+            % could be for very long...
+            while strcmp(Z.CamStatus,'exposing')
+                pause(0.05)
+            end
             
             roi=Z.ROI;
             w= roi(3)-roi(1)+1;
@@ -17,12 +22,12 @@ function img=collectExposure(Z)
                 Z.time_end=[];
             end
 
-            roi=Z.ROI;
             img=unpackImgBuffer(Z.pImg,w,h,1,Z.bitDepth);
 
             Z.deallocate_image_buffer
 
-            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,'could retrieve exposure from camera');
+            Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
+                           'could not retrieve exposure from camera');
         otherwise
             Z.lastError='no image to read because exposure not started';
             img=[];
