@@ -196,43 +196,7 @@ classdef ZWOASICamera < handle
         function set.ROI(Z,roi)
             % ROI width has to be multiple of 8 and height multiple of 2.
             % Notes:the position is relative to the image after binning
-            x1=roi(1);
-            y1=roi(2);
-            sx=roi(3)-roi(1)+1;
-            sy=roi(4)-roi(2)+1;
-            
-            % try to clip unreasonable values
-            x1=max(min(x1,Z.physical_size.nx-1),0);
-            y1=max(min(y1,Z.physical_size.ny-1),0);
-            sx=max(min(sx,Z.physical_size.nx-x1),1);
-            sy=max(min(sy,Z.physical_size.ny-y1),1);
-            
-            if Z.bitDepth==16
-                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW16; % the only ones we work in
-            else
-                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW8; % the only ones we work in
-            end
-            ret1=ASISetROIFormat(Z.camhandle,sx,sy,max(Z.binning),imgtype);
-             % StartPos is called second
-             %  "because ASISetROIFormat will change ROI to the center")
-            ret2=ASISetStartPos(Z.camhandle,x1,y1);
-            
-            success= (ret1==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
-                      ret2==inst.ASI_ERROR_CODE.ASI_SUCCESS);
-            Z.setLastError(success,'could not set ROI')
-            if success
-                Z.report(sprintf('ROI successfully set to (%d,%d)+(%dx%d)\n',...
-                          x1,y1,sx,sy));
-            else
-                Z.report(sprintf('set ROI to (%d,%d)+(%dx%d) FAILED\n',x1,y1,sx,sy));
-                if mod(sx,8)
-                    Z.report('ROI width must me a multiple of 8\n')
-                end
-                if mod(sy,2)
-                    Z.report('ROI height must me a multiple of 2\n')
-                end
-            end
-            
+            Z.setROIbinDepth(roi,Z.binning,Z.bitDepth)
         end
 
         function roi=get.ROI(Z)
@@ -269,22 +233,16 @@ classdef ZWOASICamera < handle
         end
         
         function set.binning(Z,binning)
-            % may be tricky: ROI has to take binning into account
-            % also, ASI_CONTROL_TYPE.ASI_HARDWARE_BIN and
+            % binning can be a scalar or an array of two elements [binx,biny]
+            %  The function however sets binx=biny=max(binx,biny), as this
+            %  is the only possibility supported by the SDK.
+            % Note that ROI coordinates refer to the binned raster. It is
+            %  not possible to set a high binning before reducing the ROI
+            %  such that size*binning<sensor_size.
+            % 
+            % Also, ASI_CONTROL_TYPE.ASI_HARDWARE_BIN and
             % ASI_CONTROL_TYPE.ASI_MONO_BIN (software) could be in the way.
-            roi=Z.ROI;
-            sx=roi(3)-roi(1)+1;
-            sy=roi(4)-roi(2)+1;
-            if Z.bitDepth==16
-                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW16; % the only ones we work in
-            else
-                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW8; % the only ones we work in
-            end
-            ret1=ASISetROIFormat(Z.camhandle,sx,sy,max(binning),imgtype);
-            ret2=ASISetStartPos(Z.camhandle,roi(1),roi(2));           
-            success= (ret1==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
-                      ret2==inst.ASI_ERROR_CODE.ASI_SUCCESS);
-            Z.setLastError(success,'could not set ROI to set binning')
+            Z.setROIbinDepth(Z.ROI,binning,Z.bitDepth)
         end
         
         function binning=get.binning(Z)
@@ -300,21 +258,8 @@ classdef ZWOASICamera < handle
             % The function which changes the bit depth in the camera is the one
             %  which sets the ROI
             BitDepth=max(min(round(BitDepth/8)*8,16),8);
-            if BitDepth==16
-                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW16; % the only ones we work in
-            else
-                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW8; % the only ones we work in
-            end
             Z.report('setting ROI to set the new bit depth\n')
-            % duplicating some set.ROI code here
-            roi=Z.ROI;
-            sx=roi(3)-roi(1)+1;
-            sy=roi(4)-roi(2)+1;
-            ret1=ASISetROIFormat(Z.camhandle,sx,sy,max(Z.binning),imgtype);
-            ret2=ASISetStartPos(Z.camhandle,roi(1),roi(2));           
-            success= (ret1==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
-                      ret2==inst.ASI_ERROR_CODE.ASI_SUCCESS);
-            Z.setLastError(success,'could set ROI to set bit depth')
+            Z.setROIbinDepth(Z.ROI,Z.binning,BitDepth)
         end
 
         function bitDepth=get.bitDepth(Z)
@@ -342,6 +287,51 @@ classdef ZWOASICamera < handle
         
         function ColorMode=get.color(Z)
             ColorMode=false;
+        end
+        
+    end
+    
+    methods(Access=private)
+        
+        function setROIbinDepth(Z,roi,binning,bitDepth)
+            x1=double(roi(1)); % force double for /binning calculations
+            y1=double(roi(2));
+            sx=double(roi(3)-roi(1)+1);
+            sy=double(roi(4)-roi(2)+1);
+            b=double(binning(1));
+            
+            % try to clip unreasonable values
+            x1=max(min(x1,Z.physical_size.nx-1),0);
+            y1=max(min(y1,Z.physical_size.ny-1),0);
+            sx=max(floor(min(sx,(Z.physical_size.nx-1-x1)/b)/8)*8,8);
+            sy=max(floor(min(sy,(Z.physical_size.ny-1-y1)/b)/2)*2,2);
+            
+            if bitDepth==16
+                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW16; % the only ones we work in
+            else
+                imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW8; % the only ones we work in
+            end
+            ret1=ASISetROIFormat(Z.camhandle,sx,sy,max(binning),imgtype);
+             % StartPos is called second
+             %  "because ASISetROIFormat will change ROI to the center")
+            ret2=ASISetStartPos(Z.camhandle,x1,y1);
+            
+            success= (ret1==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
+                      ret2==inst.ASI_ERROR_CODE.ASI_SUCCESS);
+            Z.setLastError(success,'could not set ROI or binning')
+            if success
+                Z.report(sprintf('ROI successfully set to (%d,%d)+(%dx%d)\n',...
+                          x1,y1,sx,sy));
+            else
+                Z.report(sprintf('set ROI to (%d,%d)+(%dx%d) FAILED\n',x1,y1,sx,sy));
+                if mod(sx,8)
+                    Z.report('ROI width must me a multiple of 8\n')
+                end
+                if mod(sy,2)
+                    Z.report('ROI height must me a multiple of 2\n')
+                end
+            end
+            
         end
         
     end

@@ -3,7 +3,7 @@
 LAST hardware driver for ZWO cameras.
 
 Tested with ASI_linux_mac_SDK_V1.14.1227, downloaded from
-[ZWO site](https://astronomy-imaging-camera.com/software-drivers), on Ubuntu 18 and 19.
+[ZWO site](https://astronomy-imaging-camera.com/software-drivers), on Ubuntu 18 and 19, and an **ASI6200MM** camera.
 
 # Installation and troubleshooting
 
@@ -58,3 +58,13 @@ SUBSYSTEMS=="usb", ATTR{idVendor}=="03c3", MODE="0666"
 
 Note that if the rule is not in place, the matlab binding finds the camera, but is not able
 to open it (`ASIOpenCamera()` returns `ASI_ERROR_CAMERA_CLOSED`), and that `ASIGetCameraProperty()` would return `IsUSB3Host: ASI_FALSE`.
+
+## Specific notes on ASI6200MM
+
++ The cooler and the fan stop when `disconnect()` is called, i.e. when the class
+  object is deleted. They also stop when the USB cable is pulled off.
++ After changing `bitDepth` or `binning` (both involve calls to set ROI functions),
+  the first image(s) taken may be empty/it may take a longer time to retrieve images
+  or to set the camera in video mode.
++ `CamStatus` is "unknown" when the camera is operated in video mode and after it.
+  For this reason takeExposure is allowed to start also when status is "unknown". 

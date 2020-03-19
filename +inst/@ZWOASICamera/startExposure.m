@@ -26,11 +26,9 @@ function startExposure(Z,expTime)
             if success
                 Z.time_start=t0;
                 Z.lastExpTime=Z.ExpTime;
-                Z.CamStatus='exposing';
             else
                 Z.time_start=NaN;
                 Z.lastExpTime=NaN;
-                Z.CamStatus='unknown';
                 Z.deallocate_image_buffer
             end
         otherwise

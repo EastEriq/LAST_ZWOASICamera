@@ -28,7 +28,7 @@ function imgs=takeExposureSeq(Z,num,expTime)
     for i=1:num
                 
         ret=ASIGetVideoData(Z.camhandle, Z.pImg,...
-                            w*h*Z.bitDepth/8, (2*Z.ExpTime+0.5)*1e6);
+                            w*h*Z.bitDepth/8, (Z.ExpTime+0.5)*1e6);
         
         if ret~=inst.ASI_ERROR_CODE.ASI_SUCCESS
             Z.lastError='error in retrieving live image';

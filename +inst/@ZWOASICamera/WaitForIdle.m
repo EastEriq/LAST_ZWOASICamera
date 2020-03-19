@@ -7,8 +7,11 @@ function WaitForIdle(Z,timeout)
     end
 
     t1=now;
-    while ((now-t1)*24*3600)<timeout && ~strcmp(Z.CamStatus,'idle')
+    t2=t1;
+    while ((t2-t1)*24*3600)<timeout && ~strcmp(Z.CamStatus,'idle')
         pause(0.1)
+        t2=now;
     end
 
+    Z.setLastError((t2-t1)*24*3600<timeout,'time out waiting for camera idle status')
 end
