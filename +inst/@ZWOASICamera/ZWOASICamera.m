@@ -67,12 +67,17 @@ classdef ZWOASICamera < handle
 
        % Constructor
        function Z=ZWOASICamera(cameranum)
-           if libisloaded('libASICamera2')
-               unloadlibrary('libASICamera2')
+           % Class instantiator.
+           % Load the library if not already loaded. Only during the
+           %  initial development it was helpful to unload it first, to
+           %  experiment with header file modifications.
+           % Unloading while other ZWO cameras are connected would
+           %  crash matlab right away.
+           if ~libisloaded('libASICamera2')
+               classpath=fileparts(mfilename('fullpath'));
+               loadlibrary(fullfile(classpath,'lib/libASICamera2.so'),...
+                   fullfile(classpath,'lib/ASICamera2.h'))
            end
-           classpath=fileparts(mfilename('fullpath'));
-           loadlibrary(fullfile(classpath,'lib/libASICamera2.so'),...
-               fullfile(classpath,'lib/ASICamera2.h'))
 
             % the constructor tries also to open the camera
             if exist('cameranum','var')
@@ -84,27 +89,29 @@ classdef ZWOASICamera < handle
 
        % destructor
        function delete(Z)
-            % it shouldn't harm to try to stop the acquisition for good,
-            %  even if already stopped - and delete the image pointer QC.pImg
-            %abort(Z)
-            
-            % make sure we close the communication, if not done already
-            success=disconnect(Z);
-            Z.setLastError(success,'could not close camera')
-            if success
-                Z.report('Succesfully closed camera\n')
-            else
-                Z.report('Failed to close camera\n')
-            end
-
+           % it shouldn't harm to try to stop the acquisition for good,
+           %  even if already stopped - and delete the image pointer QC.pImg
+           abort(Z)
+           
+           % make sure we close the communication, if not done already
+           success=disconnect(Z);
+           Z.setLastError(success,'could not close camera')
+           if success
+               Z.report('Succesfully closed camera\n')
+           else
+               Z.report('Failed to close camera\n')
+           end
+           
+           % Don't try to unload the library. If there are other camera
+           %  objects using it, matlab just crashes. Unlikely other SDK,
+           %  for which unload gives a catchable error, here we would just
+           %  pull the rug from under the feet
            try
-               % unloading prevents crashes on exiting matlab
-               unloadlibrary('libASICamera2')
+               % unloadlibrary('libASICamera2')
            catch
                % unloading ought to fail silently if there are extant objects
                %  depending on the library, which should happen only if
-               %  other ZWOCamera objects still exist.
-               % Modulo that unload fails for some other weird reason...
+               %  other ZWOCamera objects still exist -- but it doesn't
            end
        end
 
