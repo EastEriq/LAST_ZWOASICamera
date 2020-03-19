@@ -7,6 +7,6 @@ function default_values(Z)
     Z.ExpTime=10;
     Z.Gain=0;
     Z.offset=1;
-    Z.Temperature=-20; % check if reachable...
+    Z.Temperature=-15; % seen reachable with ~20°C ambient
     Z.coolingOn
 end

@@ -59,19 +59,23 @@ SUBSYSTEMS=="usb", ATTR{idVendor}=="03c3", MODE="0666"
 Note that if the rule is not in place, the matlab binding finds the camera, but is not able
 to open it (`ASIOpenCamera()` returns `ASI_ERROR_CAMERA_CLOSED`), and that `ASIGetCameraProperty()` would return `IsUSB3Host: ASI_FALSE`.
 
-## Specific notes on ASI6200MM
+# Specific experiences on the ASI6200MM
 
 + The cooler and the fan stop when `disconnect()` is called, i.e. when the class
   object is deleted. They also stop when the USB cable is pulled off.
-+ However, many of the ASI functions don't return errors if the cable has been pulled,
++ However, most of the ASI functions don't return errors if the cable has been pulled,
   they just return the previous values. This is deceiving. And can hang
   `takeExposureSeq()`, even when the cable is attached back in.
   The safe action is `disconnect()`/`connect()`, but the loss of connection may
-  pass undetected. I've found no other way to determine if previously connected
-  camera is still there, short of trying to close/open it or trying to acquire
-  images. Neither way is practical for implementing a periodic watchdog.
+  pass undetected.
++ I've found from the forum an indirect way to determine if a previously connected
+  camera is still there, which I've implemented in the hidden property `isConnected`
+  (pending to be tested with multiple ZWO cameras). This could perused by a periodical
+  watchdog.
++ A disconnection of the power supply turns off fan and cooler, but leaves the camera
+  alive and connected, as long as the USB cable is in.
 + After changing `bitDepth` or `binning` (both involve calls to set ROI functions),
   the first image(s) taken may be empty, or it may take a longer time to retrieve
   images, or to set the camera in video mode.
 + `CamStatus` is "unknown" when the camera is operated in video mode and after it.
-  For this reason takeExposure is allowed to start also when status is "unknown".
+  For this reason `takeExposure` is allowed to start also when status is "unknown".

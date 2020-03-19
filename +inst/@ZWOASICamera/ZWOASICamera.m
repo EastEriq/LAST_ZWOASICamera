@@ -35,6 +35,7 @@ classdef ZWOASICamera < handle
     
     % Enrico, discretional
     properties(GetAccess = public, SetAccess = private, Hidden)
+        isConnected
         physical_size=struct('chipw',[],'chiph',[],'pixelw',[],'pixelh',[],...
                              'nx',[],'ny',[]);
         effective_area=struct('x1Eff',[],'y1Eff',[],'sxEff',[],'syEff',[]);
@@ -118,6 +119,16 @@ classdef ZWOASICamera < handle
     end
     
     methods %getters and setters
+        
+        function online=get.isConnected(Z)
+            % a way to check if the camera is really still there. If
+            %  connection broke, all other getters still report the last
+            %  known value, and no error. Such is the SDK.
+            % I got the trick from
+            % https://bbs.astronomy-imaging-camera.com/viewtopic.php?f=29&t=8231&p=18353#p18353
+            ASIGetNumOfConnectedCameras;
+            online=(ASIGetNumOfControls(Z.camhandle)==inst.ASI_ERROR_CODE.ASI_SUCCESS);
+        end
         
         function status=get.CamStatus(Z)
             % rely on GetExpStatus to start with
