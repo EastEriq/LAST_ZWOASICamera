@@ -101,13 +101,10 @@ function success=connect(Z,cameranum)
     
     % TODO perhaps improve granularity of this report
     Z.setLastError(success,'something went wrong when initializing the camera');
-
-    % put here also some plausible parameter settings which are
-    %  not likely to be changed
-
-    Z.color=false;
     
-    % set default values, perhaps differentiating camera models
+    % set default values. Upon reconnecting the camera reverts to its defaults
+    %  anyway, not to what was previously set
     Z.default_values
+
     
 end
