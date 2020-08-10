@@ -29,6 +29,7 @@ classdef ZWOASICamera < handle
         CameraName
         CamStatus='unknown';
         CoolingStatus
+        CoolingPower
         time_start=[];
         time_end=[];
    end
@@ -178,6 +179,12 @@ classdef ZWOASICamera < handle
             elseif ret~=inst.ASI_ERROR_CODE.ASI_SUCCESS
                 status='unknown';
             end
+        end
+        
+        function CoolingPower=get.CoolingPower(Z)
+            % Get the current cooling power percentage
+            [ret,CoolingPower]=ASIGetControlValue(Z.camhandle,...
+                       inst.ASI_CONTROL_TYPE.ASI_COOLER_POWER_PERC);
         end
         
         function set.ExpTime(Z,ExpTime)

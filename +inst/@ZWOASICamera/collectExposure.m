@@ -34,5 +34,4 @@ function img=collectExposure(Z)
     end
     
     Z.lastImage=img;
-
 end
