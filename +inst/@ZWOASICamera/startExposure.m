@@ -17,23 +17,23 @@ function startExposure(Z,expTime)
             ret=ASIStartExposure(Z.camhandle);
             t1=now;
             
-            Z.time_start_delta=t1-t0;
+            Z.TimeStartDelta=t1-t0;
             
             success=ret==inst.ASI_ERROR_CODE.ASI_SUCCESS;
 
             Z.setLastError(success,'could not start single exposure');
 
             if success
-                Z.time_start=t0;
+                Z.TimeStart=t0;
                 Z.lastExpTime=Z.ExpTime;
             else
-                Z.time_start=NaN;
+                Z.TimeStart=NaN;
                 Z.lastExpTime=NaN;
                 Z.deallocate_image_buffer
             end
         otherwise
             Z.deallocate_image_buffer
-            Z.lastError='camera not ready to start a new exposure';
+            Z.LastError='camera not ready to start a new exposure';
     end
 
 end

@@ -1,8 +1,8 @@
 function setLastError(Z,success,msg)
-% helper to set QC.lastError empty or message
+% helper to set QC.LastError empty or message
     if success
-        Z.lastError='';
+        Z.LastError='';
     else
-        Z.lastError=msg;
+        Z.LastError=msg;
     end
 end

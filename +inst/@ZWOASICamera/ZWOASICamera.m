@@ -1,7 +1,7 @@
 classdef ZWOASICamera < handle
 
     properties
-        cameranum
+        CameraNum
         % read/write properties, settings of the camera, for which
         %  hardware query is involved.
         %  We use getters/setters, even though instantiation
@@ -12,16 +12,16 @@ classdef ZWOASICamera < handle
     end
 
     properties(Transient)
-        lastImage
+        LastImage
     end
         
     properties(Dependent = true)
         ExpTime
         Gain
-        offset
+        Offset
         Temperature
         ROI
-        binning=[1,1]; % beware - SDK sets both equal
+        Binning=[1,1]; % beware - SDK sets both equal
         ReadMode
     end
     
@@ -30,8 +30,8 @@ classdef ZWOASICamera < handle
         CamStatus='unknown';
         CoolingStatus
         CoolingPower
-        time_start=[];
-        time_end=[];
+        TimeStart=[];
+        TimeEnd=[];
    end
     
     % Enrico, discretional
@@ -44,20 +44,20 @@ classdef ZWOASICamera < handle
         readModesList=struct('name',[],'resx',[],'resy',[]);
         lastExpTime=NaN;
         progressive_frame = 0; % image of a sequence already available
-        time_start_delta % uncertainty, after-before calling exposure start
+        TimeStartDelta % uncertainty, after-before calling exposure start
     end
     
     % settings which have not been prescribed by the API,
     % but for which I have already made the code
     properties(Hidden,Dependent)
-        color
-        bitDepth
+        Color
+        BitDepth
     end
     
     properties (Hidden,Transient)
         camhandle   % handle to the camera talked to - no need for the external
                     % consumer to know it
-        lastError='';
+        LastError='';
         verbose=true;
         pImg  % pointer to the image buffer (can we gain anything in going
               %  to a double buffer model?)
@@ -68,7 +68,7 @@ classdef ZWOASICamera < handle
     methods
 
        % Constructor
-       function Z=ZWOASICamera(cameranum)
+       function Z=ZWOASICamera(CameraNum)
            % Class instantiator.
            % Load the library if not already loaded. Only during the
            %  initial development it was helpful to unload it first, to
@@ -82,8 +82,8 @@ classdef ZWOASICamera < handle
            end
 
             % the constructor tries also to open the camera
-            if exist('cameranum','var')
-                connect(Z,cameranum);
+            if exist('CameraNum','var')
+                connect(Z,CameraNum);
             else
                 connect(Z);
             end
@@ -218,31 +218,31 @@ classdef ZWOASICamera < handle
                 'could not get gain')
         end
 
-        function set.ROI(Z,roi)
+        function set.ROI(Z,ROI)
             % ROI width has to be multiple of 8 and height multiple of 2.
             % Notes:the position is relative to the image after binning
-            Z.setROIbinDepth(roi,Z.binning,Z.bitDepth)
+            Z.setROIbinDepth(ROI,Z.Binning,Z.BitDepth)
         end
 
-        function roi=get.ROI(Z)
+        function ROI=get.ROI(Z)
             % Notes:the position is relative to the image after binning
             [ret1,w,h,~,~]=ASIGetROIFormat(Z.camhandle);
             [ret2,x1,y1]=ASIGetStartPos(Z.camhandle);
-            roi=[x1,y1,x1+w-1,y1+h-1];
+            ROI=[x1,y1,x1+w-1,y1+h-1];
             success= (ret1==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
                       ret2==inst.ASI_ERROR_CODE.ASI_SUCCESS);
             Z.setLastError(success,'could not set ROI')
         end
         
-        function set.offset(Z,offset)
+        function set.Offset(Z,Offset)
             ret=ASISetControlValue(Z.camhandle,...
-                inst.ASI_CONTROL_TYPE.ASI_OFFSET,offset,false);
+                inst.ASI_CONTROL_TYPE.ASI_OFFSET,Offset,false);
             Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
                 'could not set offset')
         end
         
-        function offset=get.offset(Z)
-            [ret,offset]=ASIGetControlValue(Z.camhandle,...
+        function Offset=get.Offset(Z)
+            [ret,Offset]=ASIGetControlValue(Z.camhandle,...
                 inst.ASI_CONTROL_TYPE.ASI_OFFSET);
             Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
                 'could not get offset')
@@ -257,7 +257,7 @@ classdef ZWOASICamera < handle
             currentReadMode=0;
         end
         
-        function set.binning(Z,binning)
+        function set.Binning(Z,Binning)
             % binning can be a scalar or an array of two elements [binx,biny]
             %  The function however sets binx=biny=max(binx,biny), as this
             %  is the only possibility supported by the SDK.
@@ -267,40 +267,40 @@ classdef ZWOASICamera < handle
             % 
             % Also, ASI_CONTROL_TYPE.ASI_HARDWARE_BIN and
             % ASI_CONTROL_TYPE.ASI_MONO_BIN (software) could be in the way.
-            Z.setROIbinDepth(Z.ROI,binning,Z.bitDepth)
+            Z.setROIbinDepth(Z.ROI,Binning,Z.BitDepth)
         end
         
-        function binning=get.binning(Z)
+        function Binning=get.Binning(Z)
                  [ret,~,~,bin]=ASIGetROIFormat(Z.camhandle);
-                 binning=[bin,bin];
+                 Binning=[bin,bin];
                  Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
                      'could not get offset')
         end
         
-        function set.bitDepth(Z,BitDepth)
+        function set.BitDepth(Z,BitDepth)
             % BitDepth: 8 or 16 (bit).
             % Constrain BitDepth to 8|16
             % The function which changes the bit depth in the camera is the one
             %  which sets the ROI
             BitDepth=max(min(round(BitDepth/8)*8,16),8);
             Z.report('setting ROI to set the new bit depth\n')
-            Z.setROIbinDepth(Z.ROI,Z.binning,BitDepth)
+            Z.setROIbinDepth(Z.ROI,Z.Binning,BitDepth)
         end
 
-        function bitDepth=get.bitDepth(Z)
+        function BitDepth=get.BitDepth(Z)
             [ret,~,~,~,imgtype]=ASIGetROIFormat(Z.camhandle);
             switch imgtype
                 case inst.ASI_IMG_TYPE.ASI_IMG_RAW16
-                    bitDepth=16;
+                    BitDepth=16;
                 otherwise
-                    bitDepth=8;                    
+                    BitDepth=8;                    
             end
             success= (ret==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
-                      bitDepth==8 | bitDepth==16);
+                      BitDepth==8 | BitDepth==16);
             Z.setLastError(success,'could not get bit depth')
         end
 
-        function set.color(Z,ColorMode)
+        function set.Color(Z,ColorMode)
             % placeholder, let's allow only false, otherwise setting
             %  it would need a cascade of calls setting ROI etc.
             if ColorMode
@@ -310,7 +310,7 @@ classdef ZWOASICamera < handle
             end
         end
         
-        function ColorMode=get.color(Z)
+        function ColorMode=get.Color(Z)
             ColorMode=false;
         end
         
@@ -318,12 +318,12 @@ classdef ZWOASICamera < handle
     
     methods(Access=private)
         
-        function setROIbinDepth(Z,roi,binning,bitDepth)
-            x1=double(roi(1)); % force double for /binning calculations
-            y1=double(roi(2));
-            sx=double(roi(3)-roi(1)+1);
-            sy=double(roi(4)-roi(2)+1);
-            b=double(binning(1));
+        function setROIbinDepth(Z,ROI,Binning,BitDepth)
+            x1=double(ROi(1)); % force double for /binning calculations
+            y1=double(ROI(2));
+            sx=double(ROI(3)-ROI(1)+1);
+            sy=double(ROI(4)-ROI(2)+1);
+            b=double(Binning(1));
             
             % try to clip unreasonable values
             x1=max(min(x1,Z.physical_size.nx-1),0);
@@ -331,19 +331,19 @@ classdef ZWOASICamera < handle
             sx=max(floor(min(sx,(Z.physical_size.nx-1-x1)/b)/8)*8,8);
             sy=max(floor(min(sy,(Z.physical_size.ny-1-y1)/b)/2)*2,2);
             
-            if bitDepth==16
+            if BitDepth==16
                 imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW16; % the only ones we work in
             else
                 imgtype=inst.ASI_IMG_TYPE.ASI_IMG_RAW8; % the only ones we work in
             end
-            ret1=ASISetROIFormat(Z.camhandle,sx,sy,max(binning),imgtype);
+            ret1=ASISetROIFormat(Z.camhandle,sx,sy,max(Binning),imgtype);
              % StartPos is called second
              %  "because ASISetROIFormat will change ROI to the center")
             ret2=ASISetStartPos(Z.camhandle,x1,y1);
             
             success= (ret1==inst.ASI_ERROR_CODE.ASI_SUCCESS & ...
                       ret2==inst.ASI_ERROR_CODE.ASI_SUCCESS);
-            Z.setLastError(success,'could not set ROI or binning')
+            Z.setLastError(success,'could not set ROI or Binning')
             if success
                 Z.report(sprintf('ROI successfully set to (%d,%d)+(%dx%d)\n',...
                           x1,y1,sx,sy));

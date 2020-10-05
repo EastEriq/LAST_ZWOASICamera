@@ -13,13 +13,13 @@ function imgs=takeMultipleExposure(Z,num,expTime)
     for i=1:num
         startExposure(Z,expTime)
         
-        if ~isempty(Z.lastError)
+        if ~isempty(Z.LastError)
             return
         end
         
         imgs{i}=collectExposure(Z);
         
-        if ~isempty(Z.lastError)
+        if ~isempty(Z.LastError)
             return
         end
     end

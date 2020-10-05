@@ -1,14 +1,14 @@
-function success=connect(Z,cameranum)
+function success=connect(Z,CameraNum)
     % Open the connection with a specific camera, and
     %  read from it some basic information like color capability,
     %  physical dimensions, etc.
-    %  cameranum: int, number of the camera to open (as enumerated by the SDK)
+    %  CameraNum: int, number of the camera to open (as enumerated by the SDK)
     %     May be omitted. In that case the last camera is referred to
     
     % TODO, matlab crashes if connect() is called on an already connected
     %  camera
 
-    Z.lastError='';
+    Z.LastError='';
     
     num=ASIGetNumOfConnectedCameras;
     switch num
@@ -20,17 +20,17 @@ function success=connect(Z,cameranum)
             Z.report(sprintf('%d ZWO cameras found\n',num));
     end
 
-    if ~exist('cameranum','var')
-        Z.cameranum=num; % and thus open the last camera
+    if ~exist('CameraNum','var')
+        Z.CameraNum=num; % and thus open the last camera
                          % (TODO, if possible, the first not
                          %  already open)
     else
-        Z.cameranum=max(min(cameranum,num),1);
+        Z.CameraNum=max(min(CameraNum,num),1);
     end
-    [ret1,Cinfo]=ASIGetCameraProperty(Z.cameranum-1);
+    [ret1,Cinfo]=ASIGetCameraProperty(Z.CameraNum-1);
 
     if ret1
-        Z.lastError='could not even get one camera id';
+        Z.LastError='could not even get one camera id';
         return;
     end
     
@@ -40,7 +40,7 @@ function success=connect(Z,cameranum)
     [~,SN]=ASIGetSerialNumber(Z.camhandle);
     Z.CameraName=[Cinfo.Name ' ' SN];
     if ret2
-        Z.lastError='could not even get one camera id';
+        Z.LastError='could not even get one camera id';
         return;
     else
         Z.report(sprintf('Opened camera "%s"\n',Z.CameraName));
