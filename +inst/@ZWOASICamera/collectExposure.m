@@ -34,4 +34,5 @@ function img=collectExposure(Z)
     end
     
     Z.LastImage=img;
+    Z.LastImageSaved=false;    
 end
