@@ -15,6 +15,9 @@ function img=collectExposure(Z)
             h= roi(4)-roi(2)+1;
             ret=ASIGetDataAfterExp(Z.camhandle,Z.pImg,w*h*Z.BitDepth/8);
 
+            Z.TimeStartLastImage=Z.TimeStart; % so we know when Z.LastImage was started,
+                                                % even if a subsequent
+                                                % exposure is started
             if ret==0
                 Z.time_end=now;
                 Z.progressive_frame=1;

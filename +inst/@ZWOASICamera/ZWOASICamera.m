@@ -32,6 +32,7 @@ classdef ZWOASICamera < handle
         CoolingPower
         TimeStart=[];
         TimeEnd=[];
+        TimeStartLastImage % copy of TimeStart when LastImage is filled, valid until LastImage is not overwritten
    end
     
     % Enrico, discretional
