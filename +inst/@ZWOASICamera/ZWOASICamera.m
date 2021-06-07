@@ -1,4 +1,4 @@
-classdef ZWOASICamera < handle
+classdef ZWOASICamera < obs.LAST_Handle
 
     properties
         CameraNum
@@ -58,8 +58,6 @@ classdef ZWOASICamera < handle
     properties (Hidden,Transient)
         camhandle   % handle to the camera talked to - no need for the external
                     % consumer to know it
-        LastError='';
-        verbose=true;
         pImg  % pointer to the image buffer (can we gain anything in going
               %  to a double buffer model?)
               % Shall we allocate it only once on open(QC), or, like now,

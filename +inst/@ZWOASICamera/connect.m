@@ -88,7 +88,7 @@ function success=connect(Z,CameraNum)
         Z.report(' Color camera\n');
     end
 
-    if Z.verbose
+    if Z.Verbose
         Z.report('No specific info on read modes:\n');
     end
     Z.readModesList(1).name='normal';
