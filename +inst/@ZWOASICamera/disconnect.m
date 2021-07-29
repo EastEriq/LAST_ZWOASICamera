@@ -3,7 +3,7 @@ function success=disconnect(Z)
     %  current camera object
 
     % don't try to close an invalid camhandle (would it really crash matlab?)
-    if ~isempty(Z.camhandle) || Z.camhandle<0
+    if ~isempty(Z.camhandle) && Z.camhandle>0
         % check this status, which may fail
         success=(ASICloseCamera(Z.camhandle)==inst.ASI_ERROR_CODE.ASI_SUCCESS);
     else

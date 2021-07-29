@@ -93,7 +93,9 @@ classdef ZWOASICamera < obs.LAST_Handle
        function delete(Z)
            % it shouldn't harm to try to stop the acquisition for good,
            %  even if already stopped - and delete the image pointer QC.pImg
-           abort(Z)
+           if ~isempty(Z.camhandle) && Z.camhandle~=-1
+               abort(Z)
+           end
            
            % make sure we close the communication, if not done already
            success=disconnect(Z);
