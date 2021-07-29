@@ -11,7 +11,7 @@ classdef ZWOASICamera < obs.LAST_Handle
         %   when the object is created
     end
 
-    properties(Transient)
+    properties(Transient, SetObservable)
         LastImage
     end
         
