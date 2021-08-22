@@ -9,8 +9,9 @@ function takeExposure(Z,expTime)
         % last image: empty it when starting, or really keep the last
         % one available till a new is there?
         Z.LastImage=[];
-        
+
         Z.startExposure(Z.ExpTime)
+        Z.SequenceLength=1;
         
         collector=timer('Name','ImageCollector',...
             'ExecutionMode','SingleShot','BusyMode','Queue',...

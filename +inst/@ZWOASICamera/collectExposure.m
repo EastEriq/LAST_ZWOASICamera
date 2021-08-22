@@ -20,7 +20,7 @@ function img=collectExposure(Z)
                                                 % exposure is started
             if ret==0
                 Z.time_end=now;
-                Z.progressive_frame=1;
+                Z.ProgressiveFrame=Z.ProgressiveFrame+1;
             else
                 Z.time_end=[];
             end

@@ -9,7 +9,8 @@ function startExposure(Z,expTime)
                 Z.ExpTime=expTime;
             end
 
-            Z.progressive_frame=0;
+            Z.ProgressiveFrame=0;
+            Z.SequenceLength=1;
 
             Z.allocate_image_buffer
 

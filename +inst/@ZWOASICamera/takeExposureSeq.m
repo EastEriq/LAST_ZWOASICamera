@@ -1,6 +1,6 @@
 function imgs=takeExposureSeq(Z,num,expTime)
 % blocking function, take N images in Live mode;
-    imgs={};
+    imgs=cell(1,num);
     
     if exist('expTime','var')
         Z.ExpTime=expTime;
@@ -25,6 +25,9 @@ function imgs=takeExposureSeq(Z,num,expTime)
     w= roi(3)-roi(1)+1;
     h= roi(4)-roi(2)+1;
 
+    Z.ProgressiveFrame=0;
+    Z.SequenceLength=num;
+    
     for i=1:num
                 
         ret=ASIGetVideoData(Z.camhandle, Z.pImg,...
@@ -37,6 +40,7 @@ function imgs=takeExposureSeq(Z,num,expTime)
         else
             Z.TimeEnd=now;
             imgs{i}=unpackImgBuffer(Z.pImg,w,h,1,Z.BitDepth);
+            Z.ProgressiveFrame=Z.ProgressiveFrame+1;
         end
     end
     
