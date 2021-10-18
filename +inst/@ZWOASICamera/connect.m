@@ -17,7 +17,7 @@ function success=connect(Z,CameraNum)
         case 1
             Z.report('One ZWO camera found\n');
         otherwise
-            Z.report(sprintf('%d ZWO cameras found\n',num));
+            Z.report('%d ZWO cameras found\n',num);
     end
 
     if ~exist('CameraNum','var')
@@ -43,7 +43,7 @@ function success=connect(Z,CameraNum)
         Z.LastError='could not even get one camera id';
         return;
     else
-        Z.report(sprintf('Opened camera "%s"\n',Z.CameraName));
+        Z.report('Opened camera "%s"\n',Z.CameraName)
     end
     
     
@@ -73,17 +73,17 @@ function success=connect(Z,CameraNum)
     
     colorAvailable=Cinfo.IsColorCam==inst.ASI_BOOL.ASI_TRUE;
 
-    Z.report(sprintf('%.3fx%.3fmm chip, %dx%d %.2fx%.2fµm pixels, %dbp\n',...
+    Z.report('%.3fx%.3fmm chip, %dx%d %.2fx%.2fµm pixels, %dbp\n',...
         Z.physical_size.chipw,Z.physical_size.chiph,...
         Z.physical_size.nx,Z.physical_size.ny,...
         Z.physical_size.pixelw,Z.physical_size.pixelh,...
-        Cinfo.BitDepth))
-    Z.report(sprintf(' effective chip area: (%d,%d)+(%dx%d)\n',...
+        Cinfo.BitDepth)
+    Z.report(' effective chip area: (%d,%d)+(%dx%d)\n',...
         Z.effective_area.x1Eff,Z.effective_area.y1Eff,...
-        Z.effective_area.sxEff,Z.effective_area.syEff));
-    Z.report(sprintf(' overscan area: (%d,%d)+(%dx%d)\n',...
+        Z.effective_area.sxEff,Z.effective_area.syEff);
+    Z.report(' overscan area: (%d,%d)+(%dx%d)\n',...
         Z.overscan_area.x1Over,Z.overscan_area.y1Over,...
-        Z.overscan_area.sxOver,Z.overscan_area.syOver));
+        Z.overscan_area.sxOver,Z.overscan_area.syOver);
     if colorAvailable
         Z.report(' Color camera\n');
     end
@@ -94,8 +94,8 @@ function success=connect(Z,CameraNum)
     Z.readModesList(1).name='normal';
     Z.readModesList(1).resx=Z.physical_size.nx;
     Z.readModesList(1).resy=Z.physical_size.ny;
-    Z.report(sprintf('(%d) %s: %dx%d\n',0,Z.readModesList(1).name,...
-             Z.readModesList(1).resx,Z.readModesList(1).resy));
+    Z.report('(%d) %s: %dx%d\n',0,Z.readModesList(1).name,...
+             Z.readModesList(1).resx,Z.readModesList(1).resy);
 
     success = (ret1==0 & ret2==0);
     

@@ -348,10 +348,10 @@ classdef ZWOASICamera < obs.LAST_Handle
                       ret2==inst.ASI_ERROR_CODE.ASI_SUCCESS);
             Z.setLastError(success,'could not set ROI or Binning')
             if success
-                Z.report(sprintf('ROI successfully set to (%d,%d)+(%dx%d)\n',...
-                          x1,y1,sx,sy));
+                Z.report('ROI successfully set to (%d,%d)+(%dx%d)\n',...
+                          x1,y1,sx,sy);
             else
-                Z.report(sprintf('set ROI to (%d,%d)+(%dx%d) FAILED\n',x1,y1,sx,sy));
+                Z.report('set ROI to (%d,%d)+(%dx%d) FAILED\n',x1,y1,sx,sy)
                 if mod(sx,8)
                     Z.report('ROI width must me a multiple of 8\n')
                 end

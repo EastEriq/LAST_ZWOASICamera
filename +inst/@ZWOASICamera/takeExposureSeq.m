@@ -50,5 +50,5 @@ function imgs=takeExposureSeq(Z,num,expTime)
     Z.deallocate_image_buffer
     
     [ret,dropped]=ASIGetDroppedFrames(Z.camhandle);
-    Z.report(sprintf('%d video frames dropped\n',dropped))
+    Z.report('%d video frames dropped\n',dropped)
 end
