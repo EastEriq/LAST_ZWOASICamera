@@ -19,10 +19,10 @@ function img=collectExposure(Z)
                                                 % even if a subsequent
                                                 % exposure is started
             if ret==0
-                Z.time_end=now;
+                Z.TimeEnd=now;
                 Z.ProgressiveFrame=Z.ProgressiveFrame+1;
             else
-                Z.time_end=[];
+                Z.TimeEnd=[];
             end
 
             img=unpackImgBuffer(Z.pImg,w,h,1,Z.BitDepth);

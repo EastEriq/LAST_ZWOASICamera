@@ -322,7 +322,7 @@ classdef ZWOASICamera < obs.LAST_Handle
     methods(Access=private)
         
         function setROIbinDepth(Z,ROI,Binning,BitDepth)
-            x1=double(ROi(1)); % force double for /binning calculations
+            x1=double(ROI(1)); % force double for /binning calculations
             y1=double(ROI(2));
             sx=double(ROI(3)-ROI(1)+1);
             sy=double(ROI(4)-ROI(2)+1);
