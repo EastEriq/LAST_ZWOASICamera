@@ -30,7 +30,7 @@ function success=connect(Z,CameraNum)
     [ret1,Cinfo]=ASIGetCameraProperty(Z.CameraNum-1);
 
     if ret1
-        Z.LastError='could not even get one camera id';
+        Z.reportError('could not even get one camera id');
         return;
     end
     
@@ -40,7 +40,7 @@ function success=connect(Z,CameraNum)
     [~,SN]=ASIGetSerialNumber(Z.camhandle);
     Z.CameraName=[Cinfo.Name ' ' SN];
     if ret2
-        Z.LastError='could not even get one camera id';
+        Z.reportError('could not open the camera');
         return;
     else
         Z.report('Opened camera "%s"\n',Z.CameraName)

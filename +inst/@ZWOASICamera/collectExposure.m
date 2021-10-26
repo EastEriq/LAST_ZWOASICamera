@@ -32,7 +32,7 @@ function img=collectExposure(Z)
             Z.setLastError(ret==inst.ASI_ERROR_CODE.ASI_SUCCESS,...
                            'could not retrieve exposure from camera');
         otherwise
-            Z.LastError='no image to read because exposure not started';
+            Z.reportError('no image to read because exposure not started')
             img=[];
     end
     

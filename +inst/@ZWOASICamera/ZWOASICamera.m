@@ -1,4 +1,4 @@
-classdef ZWOASICamera < obs.LAST_Handle
+classdef ZWOASICamera < obs.camera
 
     properties
         CameraNum

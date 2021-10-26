@@ -2,8 +2,9 @@
 
 LAST hardware driver for ZWO cameras.
 
-Tested with ASI_linux_mac_SDK_V1.14.1227, downloaded from
-[ZWO site](https://astronomy-imaging-camera.com/software-drivers), on Ubuntu 18 and 19, and an **ASI6200MM** camera.
+Tested with ASI_linux_mac_SDK_V1.14.1227 and ASI_linux_mac_SDK_V1.20.2, downloaded from
+[ZWO site](https://astronomy-imaging-camera.com/software-drivers), on Ubuntu 18,
+19 and 20, and an **ASI6200MM** and one **ASI174MM mini** camera.
 
 # Installation and troubleshooting
 
@@ -43,11 +44,20 @@ ln -s libASICamera2.so.1.14.1227 libASICamera2.so
 
 ### however,
 
-that alone may be not enough for the camera to work. Rule files in `/etc/udev/rules.d` are probably necessary for the camera to be connected. Installing
-[ASIStudio](https://astronomy-imaging-camera.com/software/ASIStudio_V1.0.1.run) does it.
-ASIStudio is convenient also as independent camera-control interface, just big (134MB, bundles several libraries for good).
+that alone may be not enough for the camera to work. Rule files in `/etc/udev/rules.d` are necessary for the camera to be connected. The procedure is described
+in the file `README.txt` in the `/lib/` directory of the sdk package.
 
-The rule files which result are `asi.rules`, `eaf.rules`, `efw.rules`. Only
+Installing
+[ASIStudio](https://astronomy-imaging-camera.com/software/ASIStudio_V1.0.1.run) does it.
+ASIStudio is convenient also as independent camera-control interface, just big (134MB, bundles several libraries for good). (**BEWARE** - the static libraries
+included can conflict with the system ones. Take care to install ASIStudio
+in a directory of its own; not in one which causes its subdirectory `lib/`
+to be in `LD_CONFIG_PATH`. I.e., **do not install it** in `/usr/local`, to
+prevent the static libraries to end up in `/usr/local/lib`. It happened to me,
+and dbus is the first to fail - preventing the computer from booting.
+
+The rule files which result from the installation of ASIStudio are `asi.rules`,
+`eaf.rules`, `efw.rules`. Only
 the first is the one relevant to the camera, the others are for other ZWO hardware. `asi.rules` spells:
 ```
 ACTION=="add", ATTR{idVendor}=="03c3", RUN+="/bin/sh -c '/bin/echo 200 >/sys/mod

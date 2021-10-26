@@ -3,6 +3,6 @@ function setLastError(Z,success,msg)
     if success
         Z.LastError='';
     else
-        Z.LastError=msg;
+        Z.reportError(msg);
     end
 end
